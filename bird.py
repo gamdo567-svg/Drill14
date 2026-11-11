@@ -1,3 +1,10 @@
+"""새떼 비행 애니메이션 (bird_animation.png)
+
+핵심 원칙: 모든 '변화량'은 (초당 변화량) x game_framework.frame_time 으로 계산한다.
+  - 위치   : x += 방향 x FLY_SPEED_PPS x frame_time
+  - 프레임 : frame += FRAMES_PER_SECOND x frame_time  (14프레임 주기로 순환)
+따라서 FPS가 30이든 300이든 1초 동안 이동한 거리와 넘어간 프레임 수가 같다.
+"""
 import random
 
 from pico2d import load_image, get_canvas_width
