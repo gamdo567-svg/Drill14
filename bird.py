@@ -1,3 +1,5 @@
+import random
+
 from pico2d import load_image, get_canvas_width
 
 import game_framework
@@ -72,8 +74,10 @@ class Bird:
             Bird.image = load_image('bird_animation.png')  # 10마리가 이미지 하나를 공유
         self.x, self.y = x, y
         self.dir = direction
-        self.speed = FLY_SPEED_PPS
-        self.frame = 0.0
+        # 모든 새가 똑같이 움직이면 한 덩어리로 보이므로 속도에 ±15% 개체차를 주고,
+        # 날갯짓 시작 프레임도 무작위로 해 서로 다른 박자로 날개를 치게 한다.
+        self.speed = FLY_SPEED_PPS * random.uniform(0.85, 1.15)
+        self.frame = random.uniform(0, FRAMES_PER_ACTION) % FRAMES_PER_ACTION
 
     def update(self):
         dt = game_framework.frame_time
