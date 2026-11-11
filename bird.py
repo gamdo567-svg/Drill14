@@ -37,3 +37,40 @@ def _build_frame_table():
 
 
 FRAMES = _build_frame_table()
+
+
+# ---------------------------------------------------------------------------
+# 물리 단위 -> 픽셀 단위 변환 (boy.py 와 같은 기준: 10px = 30cm)
+# ---------------------------------------------------------------------------
+PIXEL_PER_METER = (10.0 / 0.3)
+FLY_SPEED_KMPH = 20.0                                # 새의 순항 속도 (km/h)
+FLY_SPEED_MPM = (FLY_SPEED_KMPH * 1000.0 / 60.0)     # m/min
+FLY_SPEED_MPS = (FLY_SPEED_MPM / 60.0)               # m/s
+FLY_SPEED_PPS = (FLY_SPEED_MPS * PIXEL_PER_METER)    # pixel/s
+
+BIRD_SIZE_M = 2.4                                    # 화면에 그릴 새 한 칸의 가로 크기 (m)
+BIRD_SIZE_PX = BIRD_SIZE_M * PIXEL_PER_METER
+BIRD_SCALE = BIRD_SIZE_PX / FRAME_W                  # 원본 182px -> 화면 크기 배율
+
+
+class Bird:
+    image = None
+
+    def __init__(self, x, y, direction=1):
+        if Bird.image is None:
+            Bird.image = load_image('bird_animation.png')  # 10마리가 이미지 하나를 공유
+        self.x, self.y = x, y
+        self.dir = direction
+        self.speed = FLY_SPEED_PPS
+        self.frame = 0.0
+
+    def update(self):
+        import game_framework
+        # 이동 거리 = 속도(px/s) x 경과 시간(s)
+        self.x += self.dir * self.speed * game_framework.frame_time
+
+    def draw(self):
+        left, bottom, w, h, dy = FRAMES[int(self.frame)]
+        Bird.image.clip_draw(left, bottom, w, h,
+                             self.x, self.y + dy * BIRD_SCALE,
+                             w * BIRD_SCALE, h * BIRD_SCALE)
