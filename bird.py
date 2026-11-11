@@ -1,4 +1,4 @@
-from pico2d import load_image
+from pico2d import load_image, get_canvas_width
 
 import game_framework
 
@@ -82,8 +82,22 @@ class Bird:
         # 이동 거리 = 속도(px/s) x 경과 시간(s)
         self.x += self.dir * self.speed * dt
 
+        # 화면 끝에 닿으면 방향 전환. 한 프레임에 많이 이동해 경계를 넘어가도
+        # 경계 안으로 되돌려 놓아 화면 밖에 끼는 일이 없게 한다.
+        half_w = BIRD_SIZE_PX / 2
+        if self.x > get_canvas_width() - half_w:
+            self.x = get_canvas_width() - half_w
+            self.dir = -1
+        elif self.x < half_w:
+            self.x = half_w
+            self.dir = 1
+
     def draw(self):
         left, bottom, w, h, dy = FRAMES[int(self.frame)]
-        Bird.image.clip_draw(left, bottom, w, h,
-                             self.x, self.y + dy * BIRD_SCALE,
-                             w * BIRD_SCALE, h * BIRD_SCALE)
+        y = self.y + dy * BIRD_SCALE
+        if self.dir == 1:   # 원본 스프라이트는 오른쪽을 보고 있음
+            Bird.image.clip_draw(left, bottom, w, h,
+                                 self.x, y, w * BIRD_SCALE, h * BIRD_SCALE)
+        else:               # 왼쪽으로 날 때는 좌우 반전('h')해서 그림
+            Bird.image.clip_composite_draw(left, bottom, w, h, 0, 'h',
+                                           self.x, y, w * BIRD_SCALE, h * BIRD_SCALE)
