@@ -1,5 +1,7 @@
 from pico2d import load_image
 
+import game_framework
+
 # ---------------------------------------------------------------------------
 # 스프라이트 시트(bird_animation.png, 918 x 506) 분석 결과
 #   - 5열 x 3행, 총 14프레임 (마지막 행은 4프레임)
@@ -52,6 +54,15 @@ BIRD_SIZE_M = 2.4                                    # 화면에 그릴 새 한 
 BIRD_SIZE_PX = BIRD_SIZE_M * PIXEL_PER_METER
 BIRD_SCALE = BIRD_SIZE_PX / FRAME_W                  # 원본 182px -> 화면 크기 배율
 
+# ---------------------------------------------------------------------------
+# 날갯짓 애니메이션 속도 (시간 기준)
+#   한 번의 날갯짓(14프레임 한 바퀴)에 걸리는 시간을 정하고,
+#   거기서 '1초에 몇 프레임을 넘겨야 하는가'를 계산한다.
+# ---------------------------------------------------------------------------
+TIME_PER_ACTION = 0.5                                # 날갯짓 1회 = 0.5초
+ACTION_PER_TIME = 1.0 / TIME_PER_ACTION              # 초당 날갯짓 2회
+FRAMES_PER_SECOND = FRAMES_PER_ACTION * ACTION_PER_TIME  # 초당 28프레임 진행
+
 
 class Bird:
     image = None
@@ -65,9 +76,11 @@ class Bird:
         self.frame = 0.0
 
     def update(self):
-        import game_framework
+        dt = game_framework.frame_time
+        # 프레임 진행량 = 초당 프레임 수 x 경과 시간(s), 14프레임 주기로 순환
+        self.frame = (self.frame + FRAMES_PER_SECOND * dt) % FRAMES_PER_ACTION
         # 이동 거리 = 속도(px/s) x 경과 시간(s)
-        self.x += self.dir * self.speed * game_framework.frame_time
+        self.x += self.dir * self.speed * dt
 
     def draw(self):
         left, bottom, w, h, dy = FRAMES[int(self.frame)]
